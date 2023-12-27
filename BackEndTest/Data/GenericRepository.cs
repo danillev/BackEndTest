@@ -11,12 +11,12 @@ namespace BackEndTest.Data
             _context = context;
         }
 
-        public async Task<IEnumerable<T>> GetAll()
+        public async ValueTask<IEnumerable<T>> GetAll()
         {
             return await _context.Set<T>().ToListAsync();
         }
 
-        public async Task<T> GetById(int id)
+        public async ValueTask<T> GetById(int id)
         {
             return await _context.Set<T>().FindAsync(id);
         }

@@ -17,12 +17,14 @@ namespace BackEndTest.Controllers
         private readonly ApplicationContext _context;
         private readonly GenericRepository<Train> _trainGenericRepository;
         private readonly GenericRepository<Car> _carGenericRepository;
+        private readonly TrainsCarGenericRepository _trainsCarGenericRepository;
 
         public XmlController(ApplicationContext context)
         {
             _context = context;
             _carGenericRepository = new GenericRepository<Car>(_context);
             _trainGenericRepository = new GenericRepository<Train>(_context);
+            _trainsCarGenericRepository = new TrainsCarGenericRepository(_context);
         }
 
         [HttpPost("application/xml")]
@@ -86,7 +88,7 @@ namespace BackEndTest.Controllers
                 await UpdateExistingCarModel(carModel, model);
             }
 
-            await AddCarToTrain(trainModel, model.CarNumber);
+            await AddCarToTrain(trainModel.trainNumber, model.CarNumber);
         }
 
         private async Task CreateAndSaveNewCarModel(XmlModel model)
@@ -124,13 +126,12 @@ namespace BackEndTest.Controllers
             }
         }
 
-        private async Task AddCarToTrain(Train trainModel, int carNumber)
+        private async Task AddCarToTrain(int trainNumber, int carNumber)
         {
-            if (!trainModel.Cars.Contains(carNumber))
+            if (_trainsCarGenericRepository.GetTrainsCar(trainNumber, carNumber).Result == null)
             {
-                trainModel.Cars.Add(carNumber);
-                _trainGenericRepository.Update(trainModel);
-                await _trainGenericRepository.Save();
+                _trainsCarGenericRepository.Create(new trainsCar { carNumber = carNumber, traintNumber = trainNumber });
+                await _carGenericRepository.Save();
             }
         }
 
@@ -141,100 +142,13 @@ namespace BackEndTest.Controllers
                 fromStationName = model.FromStationName,
                 toStationName = model.ToStationName,
                 trainIndexCombined = model.TrainIndexCombined,
-                trainNumber = model.TrainNumber,
-                Cars = new List<int> { model.CarNumber }
+                trainNumber = model.TrainNumber
             };
 
+            _trainsCarGenericRepository.Create(new trainsCar { carNumber = model.CarNumber, traintNumber =  model.TrainNumber });
             _trainGenericRepository.Create(trainModel);
             await _trainGenericRepository.Save();
         }
 
-
-        /*
-        [HttpPost("application/xml")]
-        public async Task<IActionResult> Post(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-            {
-                return BadRequest("Файл не выбран или пустой");
-            }
-
-            XmlSerializer serializer = new XmlSerializer(typeof(XmlModelList));
-            List<XmlModel> XmlModels;
-            using (var stream = file.OpenReadStream())
-            {
-                XmlModelList xmlModelList = (XmlModelList)serializer.Deserialize(stream);
-                if (xmlModelList == null) { return BadRequest("Stream error!"); }
-                XmlModels = xmlModelList.XmlModels;
-            }
-
-            foreach (var model in XmlModels)
-            {
-                var trainModel = await _trainGenericRepository.GetById(model.TrainNumber);
-                if (trainModel != null) 
-                {
-                    Car carModel = await _carGenericRepository.GetById(model.CarNumber);
-                    if (carModel == null)
-                    {
-                        carModel = new Car()
-                        {
-                            carNumber = model.CarNumber,
-                            dateAndTimeLastOperation = model.WhenLastOperation,
-                            freightEtsngName = model.FreightEtsngName,
-                            freightTotalWeightKg = model.FreightTotalWeightKg,
-                            positionInTrain = model.PositionInTrain,
-                            invoiceNumber = model.InvoiceNum,
-                            lastOperationName = model.LastOperationName,
-                            lastStationName = model.LastStationName,
-                        };
-                        _carGenericRepository.Create(carModel);
-                        await _carGenericRepository.Save();
-                    }
-                    else
-                    {
-                        if (carModel.dateAndTimeLastOperation < model.WhenLastOperation)
-                        {
-                            carModel.dateAndTimeLastOperation = model.WhenLastOperation;
-                            carModel.freightEtsngName = model.FreightEtsngName;
-                            carModel.freightTotalWeightKg = model.FreightTotalWeightKg;
-                            carModel.positionInTrain = model.PositionInTrain;
-                            carModel.invoiceNumber = model.InvoiceNum;
-                            carModel.lastOperationName = model.LastOperationName;
-                            carModel.lastStationName = model.LastStationName;
-
-                            _carGenericRepository.Update(carModel);
-                            await _carGenericRepository.Save();
-                        }
-
-                    }
-
-                    if (!trainModel.Cars.Contains(model.CarNumber))
-                    {
-                        trainModel.Cars.Add(model.CarNumber);
-                        _trainGenericRepository.Update(trainModel);
-                        await _trainGenericRepository.Save();
-                    }
-                }
-                else
-                {
-                    trainModel = new Train()
-                    {
-                        fromStationName = model.FromStationName,
-                        toStationName = model.ToStationName,
-                        trainIndexCombined = model.TrainIndexCombined,
-                        trainNumber = model.TrainNumber,
-                        Cars = new List<int> { model.CarNumber }
-                    };
-                    _trainGenericRepository.Create(trainModel);
-                    await _trainGenericRepository.Save();
-                }
-                
-            }
-
-            var json = JsonSerializer.Serialize(_trainGenericRepository.GetAll());
-
-            return Ok(json);
-        }
-        */
     }
 }

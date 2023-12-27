@@ -60,8 +60,7 @@ CREATE TABLE public."Trains" (
     "trainNumber" integer NOT NULL,
     "fromStationName" text DEFAULT ''::text NOT NULL,
     "toStationName" text DEFAULT ''::text NOT NULL,
-    "trainIndexCombined" text DEFAULT ''::text NOT NULL,
-    "Cars" integer[] NOT NULL
+    "trainIndexCombined" text DEFAULT ''::text NOT NULL
 );
 
 
@@ -133,10 +132,22 @@ CREATE TABLE public."__EFMigrationsHistory" (
 ALTER TABLE public."__EFMigrationsHistory" OWNER TO postgres;
 
 --
+-- Name: trainsCars; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."trainsCars" (
+    "traintNumber" integer NOT NULL,
+    "carNumber" integer NOT NULL
+);
+
+
+ALTER TABLE public."trainsCars" OWNER TO postgres;
+
+--
 -- Data for Name: Trains; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Trains" ("trainNumber", "fromStationName", "toStationName", "trainIndexCombined", "Cars") FROM stdin;
+COPY public."Trains" ("trainNumber", "fromStationName", "toStationName", "trainIndexCombined") FROM stdin;
 \.
 
 
@@ -157,6 +168,7 @@ COPY public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") FROM stdin
 20231211100752_Initial3	7.0.11
 20231211145904_Refactoring train	7.0.11
 20231220103733_Models update	7.0.11
+20231227072454_Db update	7.0.11
 \.
 
 
@@ -165,6 +177,14 @@ COPY public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") FROM stdin
 --
 
 COPY public.cars ("carNumber", "invoiceNumber", "positionInTrain", "freightEtsngName", "freightTotalWeightKg", "dateAndTimeLastOperation", "lastOperationName", "lastStationName") FROM stdin;
+\.
+
+
+--
+-- Data for Name: trainsCars; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."trainsCars" ("traintNumber", "carNumber") FROM stdin;
 \.
 
 
@@ -219,6 +239,14 @@ ALTER TABLE ONLY public."__EFMigrationsHistory"
 
 ALTER TABLE ONLY public.cars
     ADD CONSTRAINT "PK_cars" PRIMARY KEY ("carNumber");
+
+
+--
+-- Name: trainsCars PK_trainsCars; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."trainsCars"
+    ADD CONSTRAINT "PK_trainsCars" PRIMARY KEY ("traintNumber", "carNumber");
 
 
 --

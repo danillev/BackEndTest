@@ -14,7 +14,7 @@ namespace BackEndTest.Models
         public string fromStationName { get; init; }
         [Required]
         public string toStationName { get; init; }
-        public List<int> Cars { get; set; }
+        //public List<int> Cars { get; set; }
 
     }
 }

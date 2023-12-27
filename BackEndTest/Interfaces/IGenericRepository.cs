@@ -5,8 +5,8 @@ namespace BackEndTest.Interfaces
     public interface IGenericRepository<T> : IDisposable
                         where T : class
     {
-        Task<IEnumerable<T>> GetAll();
-        Task<T> GetById(int id);
+        ValueTask<IEnumerable<T>> GetAll();
+        ValueTask<T> GetById(int id);
         Task Create(T entity);
         Task Update(T entity);
         Task Delete(T entity);

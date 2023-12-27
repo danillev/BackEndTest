@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace BackEndTest.Controllers
 {
@@ -16,27 +17,21 @@ namespace BackEndTest.Controllers
         private readonly ApplicationContext _context;
         private readonly GenericRepository<Train> _trainGenericRepository;
         private readonly GenericRepository<Car> _carGenericRepository;
+        private readonly TrainsCarGenericRepository _trainsCarGenericRepository;
 
         public SheetsExcelController(ApplicationContext context)
         {
             _context = context;
             _carGenericRepository = new GenericRepository<Car>(_context);
             _trainGenericRepository = new GenericRepository<Train>(_context);
+            _trainsCarGenericRepository = new TrainsCarGenericRepository(_context);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             Train train = await _trainGenericRepository.GetById(id);
-            List<Car> cars = new List<Car>();
-            foreach (var car in train.Cars)
-            {
-                var carModdel = await _carGenericRepository.GetById(car);
-                if (carModdel != null)
-                    cars.Add(carModdel);
-            }
-            cars = cars.OrderBy(car => car.positionInTrain).ToList();
-            
+            List<Car> cars = GetCarsByTraindNumber(train.trainNumber).Result;
             string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Resources", "NL_Template.xlsx");
             using(var package = new ExcelPackage(new FileInfo(templatePath)))
             {
@@ -58,6 +53,19 @@ namespace BackEndTest.Controllers
             }
         }
 
+        private async ValueTask<List<Car>> GetCarsByTraindNumber(int trainNumber)
+        {
+            List<Car> cars = new List<Car>();
+            var listCars = _trainsCarGenericRepository.GetListById(trainNumber).Result;
+            foreach (var car in listCars)
+            {
+                var carModdel = await _carGenericRepository.GetById(car.carNumber);
+                if (carModdel != null)
+                    cars.Add(carModdel);
+            }
+            return cars.OrderBy(car => car.positionInTrain).ToList();
+        }
+
         private void SetTrainInfo(ExcelWorksheet worksheet, Train train, List<Car> cars)
         {
             worksheet.Cells["C3"].Value = train.trainNumber;
@@ -74,7 +82,7 @@ namespace BackEndTest.Controllers
             worksheet.Cells[$"D{row}"].Value = car.dateAndTimeLastOperation.ToString("dd-MM-yyyy HH:mm:ss");
             worksheet.Cells[$"E{row}"].Value = car.freightEtsngName;
             worksheet.Cells[$"F{row}"].Value = car.freightTotalWeightKg;
-            worksheet.Cells[$"G{row}"].Value = car.lastStationName;
+            worksheet.Cells[$"G{row}"].Value = car.lastOperationName;
         }
 
         private void SetGoodsInfoSummary(ExcelWorksheet worksheet, Dictionary<string, GoodsInfo> goodsInfo, int row)
