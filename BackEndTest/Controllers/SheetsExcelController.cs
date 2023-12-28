@@ -12,14 +12,14 @@ namespace BackEndTest.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class SheetsExcelController : ControllerBase
+    public class SheetsExcelController : GlobalController
     {
         private readonly ApplicationContext _context;
         private readonly GenericRepository<Train> _trainGenericRepository;
         private readonly GenericRepository<Car> _carGenericRepository;
         private readonly TrainsCarGenericRepository _trainsCarGenericRepository;
 
-        public SheetsExcelController(ApplicationContext context)
+        public SheetsExcelController(ApplicationContext context): base(context) 
         {
             _context = context;
             _carGenericRepository = new GenericRepository<Car>(_context);
@@ -53,18 +53,7 @@ namespace BackEndTest.Controllers
             }
         }
 
-        private async ValueTask<List<Car>> GetCarsByTraindNumber(int trainNumber)
-        {
-            List<Car> cars = new List<Car>();
-            var listCars = _trainsCarGenericRepository.GetListById(trainNumber).Result;
-            foreach (var car in listCars)
-            {
-                var carModdel = await _carGenericRepository.GetById(car.carNumber);
-                if (carModdel != null)
-                    cars.Add(carModdel);
-            }
-            return cars.OrderBy(car => car.positionInTrain).ToList();
-        }
+        
 
         private void SetTrainInfo(ExcelWorksheet worksheet, Train train, List<Car> cars)
         {

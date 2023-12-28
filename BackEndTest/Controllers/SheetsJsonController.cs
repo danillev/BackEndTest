@@ -10,14 +10,14 @@ namespace BackEndTest.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class SheetsJsonController : ControllerBase
+    public class SheetsJsonController : GlobalController
     {
         private readonly ApplicationContext _context;
         private readonly GenericRepository<Train> _trainGenericRepository;
         private readonly GenericRepository<Car> _carGenericRepository;
         private readonly TrainsCarGenericRepository _trainsCarGenericRepository;
 
-        public SheetsJsonController(ApplicationContext context)
+        public SheetsJsonController(ApplicationContext context) : base(context)
         {
             _context = context;
             _carGenericRepository = new GenericRepository<Car>(_context);
@@ -38,19 +38,6 @@ namespace BackEndTest.Controllers
                 WriteIndented = true
             });
             return Ok(JsonResult);
-        }
-
-        private async ValueTask<List<Car>> GetCarsByTraindNumber(int trainNumber)
-        {
-            List<Car> cars = new List<Car>();
-            var listCars = _trainsCarGenericRepository.GetListById(trainNumber).Result;
-            foreach (var car in listCars)
-            {
-                var carModdel = await _carGenericRepository.GetById(car.carNumber);
-                if (carModdel != null)
-                    cars.Add(carModdel);
-            }
-            return cars.OrderBy(car => car.positionInTrain).ToList();
         }
     }
 }
