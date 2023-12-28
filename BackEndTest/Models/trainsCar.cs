@@ -7,6 +7,11 @@ namespace BackEndTest.Models
     {
         public int traintNumber { get; init; }
         public int carNumber { get; init; }
+        
+        public TrainsCar()
+        {
+
+        }
 
         public TrainsCar(XmlModel model)
         {

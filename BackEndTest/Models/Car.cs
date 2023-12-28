@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BackEndTest.Models
 {
+    [PrimaryKey(nameof(carNumber))]
     public class Car
     {
-        [Key]
         public int carNumber { get; init; }
         [Required]
         public string lastStationName { get; init; }
@@ -20,18 +22,18 @@ namespace BackEndTest.Models
         public string freightEtsngName { get; init; }
         [Required]
         public int freightTotalWeightKg { get; init; }
-
+        /*
         public Car(XmlModel model)
         {
-            this.carNumber = model.CarNumber;
-            this.dateAndTimeLastOperation = model.WhenLastOperation;
-            this.freightEtsngName = model.FreightEtsngName;
-            this.freightTotalWeightKg = model.FreightTotalWeightKg;
-            this.positionInTrain = model.PositionInTrain;
-            this.invoiceNumber = model.InvoiceNum;
-            this.lastOperationName = model.LastOperationName;
-            this.lastStationName = model.LastStationName;
-        }
+            carNumber = model.CarNumber;
+            dateAndTimeLastOperation = model.WhenLastOperation;
+            freightEtsngName = model.FreightEtsngName;
+            freightTotalWeightKg = model.FreightTotalWeightKg;
+            positionInTrain = model.PositionInTrain;
+            invoiceNumber = model.InvoiceNum;
+            lastOperationName = model.LastOperationName;
+            lastStationName = model.LastStationName;
+        }*/
 
         public static bool operator <(Car car, XmlModel model)
         {
@@ -41,6 +43,23 @@ namespace BackEndTest.Models
         public static bool operator >(Car car, XmlModel model)
         {
             return car.dateAndTimeLastOperation > model.WhenLastOperation;
+        }
+
+        public Car()
+        {
+
+        }
+
+        public Car(XmlModel model)
+        {
+            carNumber = model.CarNumber;
+            dateAndTimeLastOperation = model.WhenLastOperation;
+            invoiceNumber = model.InvoiceNum;
+            lastOperationName = model.LastOperationName;
+            lastStationName = model.LastStationName;
+            freightEtsngName = model.FreightEtsngName;
+            freightTotalWeightKg = model.FreightTotalWeightKg;
+            positionInTrain = model.PositionInTrain;
         }
     }
 }

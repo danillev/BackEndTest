@@ -30,38 +30,41 @@ namespace BackEndTest.Controllers
         [HttpPost("application/xml")]
         public async Task<IActionResult> Post(IFormFile file)
         {
-            if (file == null || file.Length == 0)
+            try
             {
-                return BadRequest("Файл не выбран или пустой");
-            }
+                if (file == null || file.Length == 0)
+                {
+                    throw new Exception("Файл не выбран или пустой");
+                }
+                List<XmlModel> XmlModels = await DeserializeXmlFile(file);
+                if (XmlModels == null)
+                {
+                    throw new Exception("Файл содержит неверный формат");
+                }
 
-            List<XmlModel> XmlModels = await DeserializeXmlFile(file);
-            if(XmlModels == null)
+                foreach (var model in XmlModels)
+                {
+                    ProcessXmlModel(model);
+                }
+            }
+            catch (Exception ex)
             {
-                return BadRequest("Файл содержит неверный формат");
+                return BadRequest(ex.Message);
             }
-
-            foreach (var model in XmlModels)
-            {
-                ProcessXmlModel(model);
-            }
-
-            var json = JsonSerializer.Serialize(_trainGenericRepository.GetAll());
-            return Ok(json);
+            
+            return Ok();
         }
 
-        private async Task<List<XmlModel>> DeserializeXmlFile(IFormFile file)
+        private async ValueTask<List<XmlModel>> DeserializeXmlFile(IFormFile file)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(XmlModelList));
             List<XmlModel> XmlModels;
-
             using (var stream = file.OpenReadStream())
             {
                 XmlModelList xmlModelList = (XmlModelList)serializer.Deserialize(stream);
                 if (xmlModelList == null) { throw new InvalidOperationException("Stream error!"); }
                 XmlModels = xmlModelList.XmlModels;
             }
-
             return XmlModels;
         }
 
@@ -97,8 +100,7 @@ namespace BackEndTest.Controllers
 
         private async Task CreateAndSaveNewCarModel(XmlModel model)
         {
-            var carModel = new Car(model);
-            _carGenericRepository.Create(carModel);
+            _carGenericRepository.Create(new Car(model));
             await _carGenericRepository.Save();
         }
 
@@ -106,8 +108,7 @@ namespace BackEndTest.Controllers
         {
             if (carModel < model)
             {
-                carModel = new Car(model);
-                _carGenericRepository.Update(carModel);
+                _carGenericRepository.Update(new Car(model));
                 await _carGenericRepository.Save();
             }
         }
@@ -116,17 +117,15 @@ namespace BackEndTest.Controllers
         {
             if (_trainsCarGenericRepository.GetTrainsCar(model.TrainNumber, model.CarNumber).Result == null)
             {
-                _trainsCarGenericRepository.Create(new TrainsCar (model));
+                _trainsCarGenericRepository.Create(new TrainsCar(model));
                 await _carGenericRepository.Save();
             }
         }
 
         private async Task ProcessNewTrainModel(XmlModel model)
         {
-            var trainModel = new Train(model);
-
-            _trainsCarGenericRepository.Create(new TrainsCar (model));
-            _trainGenericRepository.Create(trainModel);
+            _trainsCarGenericRepository.Create(new TrainsCar(model));
+            _trainGenericRepository.Create(new Train(model));
             await _trainGenericRepository.Save();
         }
 
