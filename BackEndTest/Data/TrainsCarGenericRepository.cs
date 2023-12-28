@@ -5,21 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BackEndTest.Data
 {
-    public class TrainsCarGenericRepository: GenericRepository<trainsCar>
+    public class TrainsCarGenericRepository: GenericRepository<TrainsCar>
     {
         public TrainsCarGenericRepository(ApplicationContext context) : base(context)
         {
             _context = context;
         }
 
-        public async ValueTask<trainsCar> GetTrainsCar(int trainNumber, int carNumber)
+        public async ValueTask<TrainsCar> GetTrainsCar(int trainNumber, int carNumber)
         {
-            return await _context.Set<trainsCar>().FirstOrDefaultAsync(x => x.traintNumber == trainNumber && x.carNumber == carNumber);
+            return await _context.Set<TrainsCar>().FirstOrDefaultAsync(x => x.traintNumber == trainNumber && x.carNumber == carNumber);
         }
         
-        public async ValueTask<IEnumerable<trainsCar>> GetListById(int id)
+        public async ValueTask<IEnumerable<TrainsCar>> GetListById(int id)
         {
-            return await _context.Set<trainsCar>().Where(x => x.traintNumber == id).ToListAsync();
+            return await _context.Set<TrainsCar>().Where(x => x.traintNumber == id).ToListAsync();
         }
     }
 }

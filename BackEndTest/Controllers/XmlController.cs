@@ -36,10 +36,14 @@ namespace BackEndTest.Controllers
             }
 
             List<XmlModel> XmlModels = await DeserializeXmlFile(file);
+            if(XmlModels == null)
+            {
+                return BadRequest("Файл содержит неверный формат");
+            }
 
             foreach (var model in XmlModels)
             {
-                await ProcessXmlModel(model);
+                ProcessXmlModel(model);
             }
 
             var json = JsonSerializer.Serialize(_trainGenericRepository.GetAll());
@@ -61,23 +65,23 @@ namespace BackEndTest.Controllers
             return XmlModels;
         }
 
-        private async Task ProcessXmlModel(XmlModel model)
+        private void ProcessXmlModel(XmlModel model)
         {
-            var trainModel = await _trainGenericRepository.GetById(model.TrainNumber);
+            var trainModel = _trainGenericRepository.GetById(model.TrainNumber).Result;
 
             if (trainModel != null)
             {
-                await ProcessExistingTrainModel(trainModel, model);
+                ProcessExistingTrainModel(trainModel, model);
             }
             else
             {
-                await ProcessNewTrainModel(model);
+                ProcessNewTrainModel(model);
             }
         }
 
         private async Task ProcessExistingTrainModel(Train trainModel, XmlModel model)
         {
-            var carModel = await _carGenericRepository.GetById(model.CarNumber);
+            var carModel = _carGenericRepository.GetById(model.CarNumber).Result;
 
             if (carModel == null)
             {
@@ -88,64 +92,40 @@ namespace BackEndTest.Controllers
                 await UpdateExistingCarModel(carModel, model);
             }
 
-            await AddCarToTrain(trainModel.trainNumber, model.CarNumber);
+            await AddCarToTrain(model);
         }
 
         private async Task CreateAndSaveNewCarModel(XmlModel model)
         {
-            var carModel = new Car()
-            {
-                carNumber = model.CarNumber,
-                dateAndTimeLastOperation = model.WhenLastOperation,
-                freightEtsngName = model.FreightEtsngName,
-                freightTotalWeightKg = model.FreightTotalWeightKg,
-                positionInTrain = model.PositionInTrain,
-                invoiceNumber = model.InvoiceNum,
-                lastOperationName = model.LastOperationName,
-                lastStationName = model.LastStationName,
-            };
-
+            var carModel = new Car(model);
             _carGenericRepository.Create(carModel);
             await _carGenericRepository.Save();
         }
 
         private async Task UpdateExistingCarModel(Car carModel, XmlModel model)
         {
-            if (carModel.dateAndTimeLastOperation < model.WhenLastOperation)
+            if (carModel < model)
             {
-                carModel.dateAndTimeLastOperation = model.WhenLastOperation;
-                carModel.freightEtsngName = model.FreightEtsngName;
-                carModel.freightTotalWeightKg = model.FreightTotalWeightKg;
-                carModel.positionInTrain = model.PositionInTrain;
-                carModel.invoiceNumber = model.InvoiceNum;
-                carModel.lastOperationName = model.LastOperationName;
-                carModel.lastStationName = model.LastStationName;
-
+                carModel = new Car(model);
                 _carGenericRepository.Update(carModel);
                 await _carGenericRepository.Save();
             }
         }
 
-        private async Task AddCarToTrain(int trainNumber, int carNumber)
+        private async Task AddCarToTrain(XmlModel model)
         {
-            if (_trainsCarGenericRepository.GetTrainsCar(trainNumber, carNumber).Result == null)
+            if (_trainsCarGenericRepository.GetTrainsCar(model.TrainNumber, model.CarNumber).Result == null)
             {
-                _trainsCarGenericRepository.Create(new trainsCar { carNumber = carNumber, traintNumber = trainNumber });
+                _trainsCarGenericRepository.Create(new TrainsCar (model));
                 await _carGenericRepository.Save();
             }
         }
 
         private async Task ProcessNewTrainModel(XmlModel model)
         {
-            var trainModel = new Train()
-            {
-                fromStationName = model.FromStationName,
-                toStationName = model.ToStationName,
-                trainIndexCombined = model.TrainIndexCombined,
-                trainNumber = model.TrainNumber
-            };
+            var trainModel = new Train(model);
 
-            _trainsCarGenericRepository.Create(new trainsCar { carNumber = model.CarNumber, traintNumber =  model.TrainNumber });
+            _trainsCarGenericRepository.Create(new TrainsCar (model));
             _trainGenericRepository.Create(trainModel);
             await _trainGenericRepository.Save();
         }

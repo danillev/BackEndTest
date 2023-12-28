@@ -13,13 +13,13 @@ namespace BackEndTest.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<trainsCar>()
+            modelBuilder.Entity<TrainsCar>()
                 .HasKey(tc => new { tc.traintNumber, tc.carNumber });
         }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Train> Trains { get; set; }
         public DbSet<Car> cars { get; set; }
-        public DbSet<trainsCar> trainsCars { get; set; }
+        public DbSet<TrainsCar> trainsCars { get; set; }
     }
 }

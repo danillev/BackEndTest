@@ -16,5 +16,13 @@ namespace BackEndTest.Models
         public string toStationName { get; init; }
         //public List<int> Cars { get; set; }
 
+        public Train(XmlModel model)
+        {
+            this.fromStationName = model.FromStationName;
+            this.toStationName = model.ToStationName;
+            this.trainIndexCombined = model.TrainIndexCombined;
+            this.trainNumber = model.TrainNumber;
+            
+        }
     }
 }
