@@ -22,19 +22,7 @@ namespace BackEndTest.Models
         public string freightEtsngName { get; init; }
         [Required]
         public int freightTotalWeightKg { get; init; }
-        /*
-        public Car(XmlModel model)
-        {
-            carNumber = model.CarNumber;
-            dateAndTimeLastOperation = model.WhenLastOperation;
-            freightEtsngName = model.FreightEtsngName;
-            freightTotalWeightKg = model.FreightTotalWeightKg;
-            positionInTrain = model.PositionInTrain;
-            invoiceNumber = model.InvoiceNum;
-            lastOperationName = model.LastOperationName;
-            lastStationName = model.LastStationName;
-        }*/
-
+        
         public static bool operator <(Car car, XmlModel model)
         {
             return car.dateAndTimeLastOperation < model.WhenLastOperation;
