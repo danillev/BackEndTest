@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace BackEndTest.Models
 {
     [PrimaryKey(nameof(carNumber))]
-    public class Car
+    public record class Car
     {
         public int carNumber { get; init; }
         [Required]

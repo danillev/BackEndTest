@@ -1,9 +1,6 @@
 ﻿using BackEndTest.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -13,10 +10,32 @@ namespace BackEndTest.Services
     public class ServiceFacade
     {
         private readonly AuthOptions _options;
-
-        public ServiceFacade()
+        private WebApplication _webApplication;
+        public ServiceFacade(WebApplicationBuilder webAppBuilder)
         {
             _options = new AuthOptions();
+
+
+            Configure(webAppBuilder);
+            _webApplication = webAppBuilder.Build();
+
+            if (_webApplication.Environment.IsDevelopment())
+            {
+                _webApplication.UseSwagger();
+                _webApplication.UseSwaggerUI();
+            }
+
+            _webApplication.UseHttpsRedirection();
+
+            _webApplication.UseAuthentication();
+            _webApplication.UseAuthorization();
+
+            _webApplication.MapControllers();
+        }
+
+        public void Run()
+        {
+            _webApplication.Run();
         }
 
         public void Configure(WebApplicationBuilder builder)
