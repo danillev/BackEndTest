@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BackEndTest.Controllers
 {
-    public class GlobalController : ControllerBase
+    public class SheetsControllerBase : ControllerBase
     {
         private readonly ApplicationContext _context;
         private readonly GenericRepository<Train> _trainGenericRepository;
         private readonly GenericRepository<Car> _carGenericRepository;
         private readonly TrainsCarGenericRepository _trainsCarGenericRepository;
 
-        public GlobalController(ApplicationContext context)
+        public SheetsControllerBase(ApplicationContext context)
         {
             _context = context;
             _carGenericRepository = new GenericRepository<Car>(_context);

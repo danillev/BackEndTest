@@ -11,7 +11,7 @@ namespace BackEndTest.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class SheetsJsonController : GlobalController
+    public class SheetsJsonController : SheetsControllerBase
     {
         private readonly ApplicationContext _context;
         private readonly GenericRepository<Train> _trainGenericRepository;

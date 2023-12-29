@@ -12,7 +12,7 @@ namespace BackEndTest.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class SheetsExcelController : GlobalController
+    public class SheetsExcelController : SheetsControllerBase
     {
         private readonly ApplicationContext _context;
         private readonly GenericRepository<Train> _trainGenericRepository;
