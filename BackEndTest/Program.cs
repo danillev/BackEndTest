@@ -86,42 +86,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapPost("/login", async (User loginData, [FromServices] ApplicationContext db) =>
-{
-    if (loginData == null)
-    {
-        return Results.BadRequest("Invalid login or password");
-    }
-    var userGeneric = new UserGenericRepository(db);
-    User user = userGeneric.GetByEmail(loginData.Email);
-    if (user == null)
-    {
-        return Results.NotFound(new { Message = "User not found" });
-    }
-
-    PasswordHasher<User> hasher = new PasswordHasher<User>();
-    var test = hasher.VerifyHashedPassword(loginData, user.PasswordHash, loginData.PasswordHash);
-    switch (test)
-    {
-        case PasswordVerificationResult.Success: break;
-        case PasswordVerificationResult.Failed: return Results.BadRequest(new { Message = loginData.PasswordHash });
-    }
-
-    var claims = new List<Claim> { new Claim(ClaimTypes.Name, user.Email) };
-    var jwt = new JwtSecurityToken(issuer: AuthOptions.ISSUER,
-        audience: AuthOptions.AUDIENCE,
-        claims: claims,
-        expires: DateTime.UtcNow.Add(TimeSpan.FromHours(3)),
-        signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-    var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-    var response = new
-    {
-        access_token = encodedJwt,
-        email = user.Email
-    };
-    return Results.Ok(response);
-});
-
 app.MapControllers();
 
 app.Run();
