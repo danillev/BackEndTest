@@ -1,0 +1,72 @@
+﻿using BackEndTest.Data;
+using BackEndTest.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+
+namespace BackEndTest.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private readonly ApplicationContext _context;
+        private readonly UserGenericRepository _userRepository;
+
+        public AuthController(ApplicationContext context) 
+        { 
+            _context = context;
+            _userRepository = new UserGenericRepository(context);
+        }
+
+        
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] User loginData)
+        {
+
+            if (loginData == null)
+            {
+                return BadRequest("Invalid login or password");
+            }
+
+            User user = _userRepository.GetByEmail(loginData.Email);
+            if (user == null)
+            {
+                return NotFound(new { Message = "User not found" });
+            }
+
+            if (!IsPasswordValidate(loginData, user.PasswordHash))
+            {
+                return BadRequest(new { Message = loginData.PasswordHash });
+            }
+
+            var response = new
+            {
+                access_token = GeneratejwtToken(user.Email),
+                email = user.Email
+            };
+            return Ok(response);
+        }
+
+        private bool IsPasswordValidate(User loginData, string passwordHash)
+        {
+            PasswordHasher<User> hasher = new PasswordHasher<User>();
+            var IsPasswordValidate = hasher.VerifyHashedPassword(loginData, passwordHash, loginData.PasswordHash);
+            return IsPasswordValidate == PasswordVerificationResult.Success;
+        }
+
+        private string GeneratejwtToken(string Email) 
+        {
+            var claims = new List<Claim> { new Claim(ClaimTypes.Name, Email) };
+            var jwt = new JwtSecurityToken(issuer: AuthOptions.ISSUER,
+                audience: AuthOptions.AUDIENCE,
+                claims: claims,
+                expires: DateTime.UtcNow.Add(TimeSpan.FromHours(3)),
+                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
+        }
+    }
+}
