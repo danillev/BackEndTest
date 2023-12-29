@@ -31,6 +31,11 @@ namespace BackEndTest.Controllers
         public async Task<IActionResult> Get(int id)
         {
             Train train = await _trainGenericRepository.GetById(id);
+            if (train == null)
+            {
+                return NotFound();
+            }
+
             List<Car> cars = GetCarsByTraindNumber(train.trainNumber).Result;
             string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Resources", "NL_Template.xlsx");
             using(var package = new ExcelPackage(new FileInfo(templatePath)))

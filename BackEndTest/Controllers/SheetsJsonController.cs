@@ -3,6 +3,7 @@ using BackEndTest.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace BackEndTest.Controllers
@@ -30,6 +31,10 @@ namespace BackEndTest.Controllers
         {
             TrainWithCars trainWithCars = new TrainWithCars();
             trainWithCars.train = await _trainGenericRepository.GetById(id);
+            if (trainWithCars.train == null)
+            {
+                return NotFound();
+            }
             trainWithCars.cars = GetCarsByTraindNumber(trainWithCars.train.trainNumber).Result;
 
             var JsonResult = JsonSerializer.Serialize(trainWithCars, new JsonSerializerOptions

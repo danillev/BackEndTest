@@ -1,5 +1,7 @@
 ﻿using BackEndTest.Data;
 using BackEndTest.Models;
+using BackEndTest.Services;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +17,13 @@ namespace BackEndTest.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly UserGenericRepository _userRepository;
+        private readonly AuthOptions _authOptions;
 
         public AuthController(ApplicationContext context) 
         { 
             _context = context;
             _userRepository = new UserGenericRepository(context);
+            _authOptions = new AuthOptions();
         }
 
         
@@ -61,11 +65,11 @@ namespace BackEndTest.Controllers
         private string GeneratejwtToken(string Email) 
         {
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, Email) };
-            var jwt = new JwtSecurityToken(issuer: AuthOptions.ISSUER,
-                audience: AuthOptions.AUDIENCE,
+            var jwt = new JwtSecurityToken(issuer: _authOptions.ISSUER,
+                audience: _authOptions.AUDIENCE,
                 claims: claims,
                 expires: DateTime.UtcNow.Add(TimeSpan.FromHours(3)),
-                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                signingCredentials: new SigningCredentials(_authOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
     }
