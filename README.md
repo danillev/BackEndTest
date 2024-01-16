@@ -2,32 +2,28 @@
 На выход возможно получить данные о текущем состоянии поезда в Json и Excel форматах.
 
 Пример XML файла:
-<Root>
-  <row>
     <--Номер поезда -->
-    <TrainNumber></TrainNumber>
+    TrainNumber
     <--Индекс поезда -->
-    <TrainIndexCombined></TrainIndexCombined>
+    TrainIndexCombined
     <--Наименование станции отправления -->
-    <FromStationName></FromStationName>
+    FromStationName
     <--Наименование станции назначения -->
-    <ToStationName></ToStationName>
+    ToStationName
     <--Наименование станции дислокации (текущего местонахождения) -->
-    <LastStationName></LastStationName>
+    LastStationName
     <--Дата и время операции над составом -->
-    <WhenLastOperation></WhenLastOperation>
+    WhenLastOperation
     <--Наименование операции -->
-    <LastOperationName></LastOperationName>
+    LastOperationName
     <-- Номер накладной -->
-    <InvoiceNum></InvoiceNum>
+    InvoiceNum
     <-- Позиция вагона в составе -->
-    <PositionInTrain></PositionInTrain>
+    PositionInTrain
     <-- Номер вагона -->
-    <CarNumber></CarNumber>
+    CarNumber
     <-- Наименование груза -->
-    <FreightEtsngName></FreightEtsngName>
+    FreightEtsngName
     <-- Общий вес вагона с грузом -->
-    <FreightTotalWeightKg></FreightTotalWeightKg>
-  </row>
-{0…..N}
-</Root>
+    FreightTotalWeightKg
+
